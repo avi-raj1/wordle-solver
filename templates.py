@@ -125,7 +125,7 @@ TEMPLATE = """
         <h4>Attempt #{{ tries + 1 }}</h4>
         <h6>Words remaining: {{ possible_words|length }}</h6>
         <div class="words-preview">
-            Top words:
+            Some of remaining words:
             <div class="word-list">
                 {% for word in possible_words[:7] %}
                     <span class="word-badge color-{{ loop.index0 % 10 }}">{{ word }}</span>
