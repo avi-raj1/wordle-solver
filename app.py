@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template_string, request, redirect, url_for
 from utils import load_words, suggest_top_guesses, filter_possible_words
 
@@ -119,6 +118,21 @@ TEMPLATE = """
             margin: 1rem 0;
             justify-content: center;
         }
+        .guess-options form {
+            flex-grow: 1;
+        }
+        .guess-button {
+            background-color: #0077cc;
+            color: white;
+        }
+        .guess-button:hover {
+            background-color: #005fa3;
+        }
+        .selected {
+            background-color: gold !important;
+            color: #333 !important;
+            border: 2px solid #333;
+        }
     </style>
 </head>
 <body>
@@ -136,9 +150,11 @@ TEMPLATE = """
         <h1>Try guessing:</h1>
         <div class="guess-options">
             {% for option in top_guesses %}
-                <form method="POST" style="margin: 0">
+                <form method="POST">
                     <input type="hidden" name="selected_guess" value="{{ option }}">
-                    <button type="submit">{{ option }}</button>
+                    <button type="submit" class="guess-button {% if option == guess %}selected{% endif %}">
+                        {{ option }}
+                    </button>
                 </form>
             {% endfor %}
         </div>
@@ -197,7 +213,7 @@ def index():
                 )
 
             session_data["top_guesses"] = suggest_top_guesses(
-                session_data["possible_words"], session_data["all_words"], top_n=3
+                session_data["possible_words"], session_data["all_words"], top_n=5
             )
             session_data["guess"] = session_data["top_guesses"][0]
 

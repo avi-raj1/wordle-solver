@@ -42,7 +42,9 @@ def compute_entropy(guess, possible_words):
     return entropy
 
 
-def suggest_top_guesses(possible_words, all_words, top_n=3):
+def suggest_top_guesses(possible_words, all_words, top_n=5):
+    if len(possible_words)==1:
+        return possible_words
     scored = [(word, compute_entropy(word, possible_words)) for word in all_words]
     scored.sort(key=lambda x: x[1], reverse=True)
     return [word for word, _ in scored[:top_n]]
