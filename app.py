@@ -4,7 +4,6 @@ from utils import load_words, suggest_best_guess, filter_possible_words
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
 
-# Basic global session (not production safe)
 session_data = {
     "tries": 0,
     "feedback": None,
@@ -68,20 +67,45 @@ TEMPLATE = """
             text-align: center;
             color: #d32f2f;
         }
-        .words-preview {
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: #555;
-            text-align: center;
-            margin-bottom: 1rem;
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
+        .word-badge {
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .color-0 { background-color: #007bff; }
+        .color-1 { background-color: #28a745; }
+        .color-2 { background-color: #ffc107; color: #212529; }
+        .color-3 { background-color: #17a2b8; }
+        .color-4 { background-color: #6f42c1; }
+        .color-5 { background-color: #e83e8c; }
+        .color-6 { background-color: #fd7e14; }
+        .color-7 { background-color: #20c997; }
+        .color-8 { background-color: #6610f2; }
+        .color-9 { background-color: #dc3545; }
     </style>
 </head>
 <body>
     <div class="container">
         <h4>Attempt #{{ tries + 1 }}</h4>
         <h6>Words remaining: {{ possible_words|length }}</h6>
-        <div class="words-preview">Top 10 words: {{ possible_words[:10] }}</div>
+        <div class="words-preview">
+            Top words:
+            <div class="word-list">
+                {% for word in possible_words[:7] %}
+                    <span class="word-badge color-{{ loop.index0 % 7 }}">{{ word }}</span>
+                {% endfor %}
+            </div>
+        </div>
         <h1>Try guessing: <span style="color:#0077cc">{{ guess }}</span></h1>
         <form method="POST">
             <label for="feedback">Enter feedback (B = Black, Y = Yellow, G = Green):</label>
