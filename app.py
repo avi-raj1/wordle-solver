@@ -7,7 +7,7 @@ app.secret_key = "your-secret-key"
 session_data = {
     "tries": 0,
     "feedback": None,
-    "all_words": load_words("words.txt"),
+    "all_words": load_words("words_lite.txt"),
     "possible_words": [],
     "guess": "tares",
     "top_guesses": []
