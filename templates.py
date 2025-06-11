@@ -155,6 +155,9 @@ TEMPLATE = """
             <a href="{{ url_for('reset') }}" class="reset-button"> Reset</a>
         </div>
     </div>
+    <footer style="margin-top: 2rem; text-align: center; font-size: 0.9rem; color: #777;">
+            Made with ❤️ by Avi Raj
+    </footer>
 </body>
 </html>
 """
