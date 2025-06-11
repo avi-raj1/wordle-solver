@@ -2,9 +2,9 @@ from flask import Flask, render_template_string, request, redirect, url_for
 from utils import load_words, suggest_best_guess, filter_possible_words
 
 app = Flask(__name__)
-app.secret_key = "your-secret-key"  # Required for sessions if you want to persist across requests
+app.secret_key = "your-secret-key"
 
-# Global session (basic – not for production)
+# Basic global session (not production safe)
 session_data = {
     "tries": 0,
     "feedback": None,
@@ -14,7 +14,6 @@ session_data = {
 }
 session_data["possible_words"] = session_data["all_words"].copy()
 
-# Basic HTML template
 TEMPLATE = """
 <!doctype html>
 <html lang="en">
@@ -81,9 +80,11 @@ TEMPLATE = """
 <body>
     <div class="container">
         <h4>Attempt #{{ tries + 1 }}</h4>
+        <h6>Words remaining: {{ possible_words|length }}</h6>
+        <div class="words-preview">Top 10 words: {{ possible_words[:10] }}</div>
         <h1>Try guessing: <span style="color:#0077cc">{{ guess }}</span></h1>
         <form method="POST">
-            <label for="feedback">Enter feedback from Wordle (B = Black, Y = Yellow, G = Green) eg: GBBBY:</label>
+            <label for="feedback">Enter feedback (B = Black, Y = Yellow, G = Green):</label>
             <input name="feedback" maxlength="5" required autofocus placeholder="e.g. BYGBG">
             <button type="submit">Submit</button>
         </form>
@@ -98,7 +99,6 @@ TEMPLATE = """
 </html>
 """
 
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     msg = ""
@@ -109,7 +109,13 @@ def index():
 
         if feedback == "GGGGG":
             msg = f"🎉 Yay! Guessed in {session_data['tries']} tries."
-            return render_template_string(TEMPLATE, guess=session_data["guess"], tries=session_data["tries"], message=msg)
+            return render_template_string(
+                TEMPLATE,
+                guess=session_data["guess"],
+                tries=session_data["tries"],
+                message=msg,
+                possible_words=session_data["possible_words"]
+            )
 
         session_data["possible_words"] = filter_possible_words(
             session_data["possible_words"], session_data["guess"], feedback
@@ -117,7 +123,13 @@ def index():
 
         if len(session_data["possible_words"]) == 0:
             msg = "❌ Sorry, the word isn't in my vocabulary."
-            return render_template_string(TEMPLATE, guess=session_data["guess"], tries=session_data["tries"], message=msg)
+            return render_template_string(
+                TEMPLATE,
+                guess=session_data["guess"],
+                tries=session_data["tries"],
+                message=msg,
+                possible_words=session_data["possible_words"]
+            )
 
         session_data["guess"], _ = suggest_best_guess(
             session_data["possible_words"], session_data["all_words"]
@@ -125,9 +137,21 @@ def index():
 
         if session_data["tries"] >= 6:
             msg = "😓 Oops, I failed in 6 tries!"
-            return render_template_string(TEMPLATE, guess=session_data["guess"], tries=session_data["tries"], message=msg)
+            return render_template_string(
+                TEMPLATE,
+                guess=session_data["guess"],
+                tries=session_data["tries"],
+                message=msg,
+                possible_words=session_data["possible_words"]
+            )
 
-    return render_template_string(TEMPLATE, guess=session_data["guess"], tries=session_data["tries"], message=msg)
+    return render_template_string(
+        TEMPLATE,
+        guess=session_data["guess"],
+        tries=session_data["tries"],
+        message=msg,
+        possible_words=session_data["possible_words"]
+    )
 
 @app.route("/reset")
 def reset():
