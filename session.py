@@ -1,7 +1,7 @@
 from utils import load_words, suggest_top_guesses, filter_possible_words
 
 class WordleSession:
-    def __init__(self, wordlist_file="word_lists/words_lite.txt", start_word="tares"):
+    def __init__(self, wordlist_file="word_lists/words.txt", start_word="tares"):
         self.tries = 0
         self.feedback = None
         self.all_words = load_words(wordlist_file)

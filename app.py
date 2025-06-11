@@ -23,7 +23,7 @@ def index():
             session_data.set_guess(selected_guess)
         else:
             feedback = request.form["feedback"].strip().upper()
-            session_data.update_after_feedback(feedback, top_n=3)
+            session_data.update_after_feedback(feedback, top_n=5)
             if feedback == "GGGGG":
                 msg = f"🎉 Yay! Guessed in {session_data.tries} tries."
                 return render_wordle_template(
