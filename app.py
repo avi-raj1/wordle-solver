@@ -17,15 +17,87 @@ session_data["possible_words"] = session_data["all_words"].copy()
 # Basic HTML template
 TEMPLATE = """
 <!doctype html>
-<title>Wordle Helper</title>
-<h2>Try {{ guess }} (Attempt {{ tries + 1 }})</h2>
-<form method="POST">
-    <label>Enter feedback (B=Black, Y=Yellow, G=Green):</label><br>
-    <input name="feedback" maxlength="5" required autofocus>
-    <button type="submit">Submit</button>
-</form>
-<p>{{ message }}</p>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Wordle Helper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1, h4, h6 {
+            text-align: center;
+        }
+        input[type="text"], input[name="feedback"] {
+            width: 100%;
+            padding: 0.6rem;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .feedback {
+            margin-top: 1rem;
+            font-weight: bold;
+            text-align: center;
+            color: #d32f2f;
+        }
+        .words-preview {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #555;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h4>Attempt #{{ tries + 1 }}</h4>
+        <h1>Try guessing: <span style="color:#0077cc">{{ guess }}</span></h1>
+        <form method="POST">
+            <label for="feedback">Enter feedback from Wordle (B = Black, Y = Yellow, G = Green) eg: GBBBY:</label>
+            <input name="feedback" maxlength="5" required autofocus placeholder="e.g. BYGBG">
+            <button type="submit">Submit</button>
+        </form>
+        {% if message %}
+            <div class="feedback">{{ message }}</div>
+        {% endif %}
+        <div style="text-align:center; margin-top:1rem;">
+            <a href="{{ url_for('reset') }}">🔄 Reset</a>
+        </div>
+    </div>
+</body>
+</html>
 """
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
