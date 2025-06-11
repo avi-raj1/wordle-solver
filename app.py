@@ -92,6 +92,24 @@ TEMPLATE = """
         .color-7 { background-color: #20c997; }
         .color-8 { background-color: #6610f2; }
         .color-9 { background-color: #dc3545; }
+        .reset-container {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .reset-button {
+            text-decoration: none;
+            background-color: #999;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+        }
+        .reset-button:hover {
+            background-color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -115,8 +133,8 @@ TEMPLATE = """
         {% if message %}
             <div class="feedback">{{ message }}</div>
         {% endif %}
-        <div style="text-align:center; margin-top:1rem;">
-            <a href="{{ url_for('reset') }}">🔄 Reset</a>
+        <div class="reset-container">
+            <a href="{{ url_for('reset') }}" class="reset-button"> Reset</a>
         </div>
     </div>
 </body>
