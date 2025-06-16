@@ -35,6 +35,8 @@ def compute_entropy(guess, possible_words):
     total = len(possible_words)
     entropy = 0
 
+    return - max(pattern_counts.values())
+
     for count in pattern_counts.values():
         p = count / total
         entropy -= p * math.log2(p)
