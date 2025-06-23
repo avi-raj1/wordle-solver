@@ -32,7 +32,6 @@ A Flask-based web application to help you solve Wordle puzzles interactively. En
 ## File Structure
 - `app.py` - Main Flask app
 - `utils.py` - Wordle logic and helpers
-- `templates.py` - HTML template for the app
 - `word_lists/` - Word lists for allowed guesses
 - `requirements.txt` - Python dependencies
 
