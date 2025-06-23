@@ -1,90 +1,83 @@
-from flask import Flask, request, redirect, url_for, session
-from templates import render_wordle_template
-from session import WordleSession
-from utils import filter_possible_words, suggest_top_guesses
+from flask import Flask, render_template_string, request, session, redirect, url_for
+from utils import load_words, filter_possible_words, suggest_top_guesses
 
 app = Flask(__name__)
-app.secret_key = "your-secret-key"
+app.secret_key = 'jlhbdfvhdvvkjklbhdfvlidvfljbhdf'  # Change this in production!
 
-def get_top_guess_words(top_guesses):
-    if top_guesses and isinstance(top_guesses[0], (list, tuple)):
-        return [g[0] for g in top_guesses]
-    return top_guesses
+WORDS_FILE = 'word_lists/words_lite.txt'
 
-def get_user_session():
-    if 'wordle_session' not in session:
-        ws = WordleSession()
-        session['wordle_session'] = {
-            'tries': ws.tries,
-            'feedback': ws.feedback,
-            'all_words': ws.all_words,
-            'possible_words': ws.possible_words,
-            'guess': ws.guess,
-            'top_guesses': ws.top_guesses
-        }
-    return session['wordle_session']
+TEMPLATE = """
+<!doctype html>
+<title>Wordle Solver</title>
+<h2>Wordle Solver</h2>
+<form method="post">
+  <label>Enter your guess:</label>
+  <input name="guess" maxlength="5" required>
+  <label>Enter feedback (G/Y/B):</label>
+  <input name="feedback" maxlength="5" required>
+  <button type="submit">Submit</button>
+</form>
+<form method="get" action="/reset" style="margin-top:10px;">
+  <button type="submit">Reset Session</button>
+</form>
+{% if guesses %}
+  <h3>History</h3>
+  <ul>
+    {% for g, f in guesses %}
+      <li>{{g}} : {{f}}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% if suggestions %}
+  <h3>Top Suggestions</h3>
+  <ul>
+    {% for s in suggestions %}
+      <li>{{s}}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% if possible_words %}
+  <p>{{possible_words|length}} possible words left.</p>
+{% endif %}
+"""
 
-def save_user_session(user_data):
-    session['wordle_session'] = user_data
-
-@app.route("/", methods=["GET", "POST"])
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    msg = ""
-    user_data = get_user_session()
-    if request.method == "POST":
-        selected_guess = request.form.get("selected_guess")
-        if selected_guess:
-            user_data['guess'] = selected_guess
+    if 'guesses' not in session:
+        session['guesses'] = []
+
+    guesses = session['guesses']
+
+    if request.method == 'POST':
+        guess = request.form['guess'].lower()
+        feedback = request.form['feedback'].upper()
+        guesses.append((guess, feedback))
+        session['guesses'] = guesses
+
+    # Recompute possible_words from guesses
+    all_words = load_words(WORDS_FILE)
+    possible_words = all_words
+    for guess, feedback in guesses:
+        possible_words = filter_possible_words(possible_words, guess, feedback)
+
+    suggestions = []
+    if possible_words:
+        if len(guesses) == 0:
+            suggestions = ['tares']
         else:
-            feedback = request.form["feedback"].strip().upper()
-            user_data['tries'] += 1
-            user_data['feedback'] = feedback
-            user_data['possible_words'] = filter_possible_words(user_data['possible_words'], user_data['guess'], feedback)
-            if feedback == "GGGGG":
-                msg = f"🎉 Yay! Guessed in {user_data['tries']} tries."
-                save_user_session(user_data)
-                return render_wordle_template(
-                    guess=user_data['guess'],
-                    tries=user_data['tries'],
-                    message=msg,
-                    possible_words=user_data['possible_words'],
-                    top_guesses=get_top_guess_words(user_data['top_guesses'])
-                )
-            if len(user_data['possible_words']) == 0:
-                msg = "❌ Sorry, the word isn't in my vocabulary."
-                save_user_session(user_data)
-                return render_wordle_template(
-                    guess=user_data['guess'],
-                    tries=user_data['tries'],
-                    message=msg,
-                    possible_words=user_data['possible_words'],
-                    top_guesses=[]
-                )
-            user_data['top_guesses'] = suggest_top_guesses(user_data['possible_words'], user_data['all_words'], top_n=5)
-            user_data['guess'] = user_data['top_guesses'][0]
-            if user_data['tries'] >= 6:
-                msg = "😓 Oops, I failed in 6 tries!"
-                save_user_session(user_data)
-                return render_wordle_template(
-                    guess=user_data['guess'],
-                    tries=user_data['tries'],
-                    message=msg,
-                    possible_words=user_data['possible_words'],
-                    top_guesses=get_top_guess_words(user_data['top_guesses'])
-                )
-    save_user_session(user_data)
-    return render_wordle_template(
-        guess=user_data['guess'],
-        tries=user_data['tries'],
-        message=msg,
-        possible_words=user_data['possible_words'],
-        top_guesses=get_top_guess_words(user_data['top_guesses'])
+            suggestions = suggest_top_guesses(possible_words, all_words, 3)
+
+    return render_template_string(
+        TEMPLATE,
+        guesses=guesses,
+        suggestions=suggestions,
+        possible_words=possible_words
     )
 
-@app.route("/reset")
+@app.route('/reset')
 def reset():
-    session.pop('wordle_session', None)
-    return redirect(url_for("index"))
+    session.pop('guesses', None)
+    return redirect(url_for('index'))
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=8080, debug=True)
