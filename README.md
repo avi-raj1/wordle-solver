@@ -1,4 +1,5 @@
-# Wordle Solver Web App
+# Wordle Solver Web App 
+https://wordle-solver-eqtr.onrender.com/
 
 A Flask-based web application to help you solve Wordle puzzles interactively. Enter your guesses and feedback, and the app will suggest the best next guesses based on entropy.
 
